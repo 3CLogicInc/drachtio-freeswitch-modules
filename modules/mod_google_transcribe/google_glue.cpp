@@ -57,17 +57,13 @@ public:
     // the rest of config comes from channel vars
 
     // number of channels in the audio stream (default: 1)
-    if (channels > 1) {
-      config->set_audio_channel_count(channels);
+    
+      config->set_audio_channel_count(2);
       switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(m_session), SWITCH_LOG_DEBUG, "audio_channel_count %d\n", channels);
-
       // transcribe each separately?
-      if (switch_true(switch_channel_get_variable(channel, "GOOGLE_SPEECH_SEPARATE_RECOGNITION_PER_CHANNEL"))) {
-        config->set_enable_separate_recognition_per_channel(true);
-        switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(m_session), SWITCH_LOG_DEBUG, "enable_separate_recognition_per_channel on\n");
-      }
-    }
-
+      config->set_enable_separate_recognition_per_channel(true);
+      switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(m_session), SWITCH_LOG_DEBUG, "enable_separate_recognition_per_channel on\n");
+   
     // max alternatives
     if (var = switch_channel_get_variable(channel, "GOOGLE_SPEECH_MAX_ALTERNATIVES")) {
       config->set_max_alternatives(atoi(var));
