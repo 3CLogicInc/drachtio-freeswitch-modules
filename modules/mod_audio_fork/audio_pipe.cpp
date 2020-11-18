@@ -166,6 +166,14 @@ int AudioPipe::lws_callback(struct lws *wsi,
           return 0;
         }
 
+        // check for graceful close - send a zero length binary frame
+        if (ap->isGracefulShutdown()) {
+          lwsl_notice("%s graceful shutdown - sending zero length binary frame to flush any final responses\n", ap->m_uuid.c_str());
+          std::lock_guard<std::mutex> lk(ap->m_audio_mutex);
+          int sent = lws_write(wsi, (unsigned char *) ap->m_audio_buffer + LWS_PRE, 0, LWS_WRITE_BINARY);
+          return 0;
+        }
+
         // check for text frames to send
         {
           std::lock_guard<std::mutex> lk(ap->m_text_mutex);
@@ -365,7 +373,7 @@ bool AudioPipe::lws_service_thread(unsigned int nServiceThread) {
   info.ws_ping_pong_interval = 20;      // interval in seconds between sending PINGs on idle websocket connections
   info.timeout_secs_ah_idle = 10;       // secs to allow a client to hold an ah without using it
 
-  lwsl_notice("AudioPipe::lws_service_thread creating context in service thread %d..\n", nServiceThread); 
+  lwsl_notice("AudioPipe::lws_service_thread creating context in service thread %d.\n", nServiceThread);
 
   contexts[nServiceThread] = lws_create_context(&info);
   if (!contexts[nServiceThread]) {
@@ -379,7 +387,6 @@ bool AudioPipe::lws_service_thread(unsigned int nServiceThread) {
   } while (n >= 0 && !lws_stopping);
 
   lwsl_notice("AudioPipe::lws_service_thread ending in service thread %d\n", nServiceThread); 
-  lws_context_destroy(contexts[nServiceThread]);
   return true;
 }
 
@@ -399,18 +406,33 @@ void AudioPipe::initialize(const char* protocol, unsigned int nThreads, int logl
   lws_initialized = true;
 }
 
-void AudioPipe::deinitialize() {
+bool AudioPipe::deinitialize() {
   assert(lws_initialized);
   lwsl_notice("AudioPipe::deinitialize\n"); 
   lws_stopping = true;
   lws_initialized = false;
+  do
+  {
+    lwsl_notice("waiting for pending connects to complete\n");
+  } while (pendingConnects.size() > 0);
+  do
+  {
+    lwsl_notice("waiting for disconnects to complete\n");
+  } while (pendingDisconnects.size() > 0);
+
+  for (unsigned int i = 0; i < numContexts; i++)
+  {
+    lwsl_notice("AudioPipe::deinitialize destroying context %d of %d\n", i + 1, numContexts);
+    lws_context_destroy(contexts[i]);
+  }
+  return true;
 }
 
 // instance members
 AudioPipe::AudioPipe(const char* uuid, const char* host, unsigned int port, const char* path,
   int sslFlags, size_t bufLen, size_t minFreespace, const char* username, const char* password, notifyHandler_t callback) :
   m_uuid(uuid), m_host(host), m_port(port), m_path(path), m_sslFlags(sslFlags),
-  m_audio_buffer_min_freespace(minFreespace), m_audio_buffer_max_len(bufLen), 
+  m_audio_buffer_min_freespace(minFreespace), m_audio_buffer_max_len(bufLen), m_gracefulShutdown(false),
   m_audio_buffer_write_offset(LWS_PRE), m_recv_buf(nullptr), m_recv_buf_ptr(nullptr), 
   m_state(LWS_CLIENT_IDLE), m_wsi(nullptr), m_vhd(nullptr), m_callback(callback) {
 
@@ -473,4 +495,9 @@ void AudioPipe::unlockAudioBuffer() {
 void AudioPipe::close() {
   if (m_state != LWS_CLIENT_CONNECTED) return;
   addPendingDisconnect(this);
+}
+
+void AudioPipe::do_graceful_shutdown() {
+  m_gracefulShutdown = true;
+  addPendingWrite(this);
 }

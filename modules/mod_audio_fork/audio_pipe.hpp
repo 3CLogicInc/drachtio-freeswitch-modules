@@ -34,7 +34,7 @@ public:
   };
 
   static void initialize(const char* protocolName, unsigned int nThreads, int loglevel, log_emit_function logger);
-  static void deinitialize();
+  static bool deinitialize();
   static bool lws_service_thread(unsigned int nServiceThread);
 
   // constructor
@@ -71,6 +71,11 @@ public:
   void getBasicAuth(std::string& username, std::string& password) {
     username = m_username;
     password = m_password;
+  }
+
+  void do_graceful_shutdown();
+  bool isGracefulShutdown(void) {
+    return m_gracefulShutdown;
   }
 
   void close() ;
@@ -129,6 +134,7 @@ private:
   log_emit_function m_logger;
   std::string m_username;
   std::string m_password;
+  bool m_gracefulShutdown;
 
 };
 
