@@ -167,6 +167,10 @@ namespace {
           char* jsonString = cJSON_PrintUnformatted(json);
           tech_pvt->responseHandler(session, EVENT_RESUME, jsonString);
           free(jsonString);
+      }else if(0 == event.compare("startDtmf")){
+         char* jsonString = cJSON_PrintUnformatted(json);
+          tech_pvt->responseHandler(session, EVENT_START_DTMF, jsonString);
+          free(jsonString);
       }
       else if (0 == event.compare("clear")){
           // clear event

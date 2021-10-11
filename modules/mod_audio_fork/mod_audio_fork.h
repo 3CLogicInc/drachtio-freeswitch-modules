@@ -26,6 +26,7 @@
 #define EVENT_MARK            "mod_audio_fork::mark"
 #define EVENT_PAUSE           "mod_audio_fork::pause"
 #define EVENT_RESUME          "mod_audio_fork::resume"
+#define EVENT_START_DTMF      "mod_audio_fork::start_dtmf"
 
 #define MAX_METADATA_LEN (8192)
 
