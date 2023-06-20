@@ -519,6 +519,7 @@ extern "C" {
     private_t* tech_pvt = (private_t*) switch_core_media_bug_get_user_data(bug);
   
     if (!tech_pvt) return SWITCH_STATUS_FALSE;
+    switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "if !tech_pvt , returned false\n");
 
     switch_core_media_bug_flush(bug);
     tech_pvt->audio_paused = pause;
@@ -550,16 +551,20 @@ extern "C" {
     bool dirty = false;
     char *p = (char *) "{\"msg\": \"buffer overrun\"}";
 
+    switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "if audio_paused is true, returning true\n");
     if (!tech_pvt || tech_pvt->audio_paused || tech_pvt->graceful_shutdown) return SWITCH_TRUE;
+    switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "if audio_paused is true, already returned true\n");
     
     if (switch_mutex_trylock(tech_pvt->mutex) == SWITCH_STATUS_SUCCESS) {
       if (!tech_pvt->pAudioPipe) {
         switch_mutex_unlock(tech_pvt->mutex);
+        switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "if !tech_pvt->pAudioPipe, returning true\n");
         return SWITCH_TRUE;
       }
       AudioPipe *pAudioPipe = static_cast<AudioPipe *>(tech_pvt->pAudioPipe);
       if (pAudioPipe->getLwsState() != AudioPipe::LWS_CLIENT_CONNECTED) {
         switch_mutex_unlock(tech_pvt->mutex);
+        switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "if Lws state not equale to LWS_CLIENT_CONNECTED, returning true\n");
         return SWITCH_TRUE;
       }
 
@@ -576,6 +581,7 @@ extern "C" {
             if (!tech_pvt->buffer_overrun_notified) {
               tech_pvt->buffer_overrun_notified = 1;
               tech_pvt->responseHandler(session, EVENT_BUFFER_OVERRUN, NULL);
+              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "if tech_pvt->buffer_overrun_notified is false\n");
             }
             switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "(%u) dropping packets!\n", 
               tech_pvt->id);
@@ -585,13 +591,16 @@ extern "C" {
             frame.buflen = available = pAudioPipe->binarySpaceAvailable();
           }
 
+          switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "if Lws state not \n");
           switch_status_t rv = switch_core_media_bug_read(bug, &frame, SWITCH_TRUE);
           if (rv != SWITCH_STATUS_SUCCESS) break;
+          switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "if rv != SWITCH_STATUS_SUCCESS\n");
           if (frame.datalen) {
             pAudioPipe->binaryWritePtrAdd(frame.datalen);
             frame.buflen = available = pAudioPipe->binarySpaceAvailable();
             frame.data = pAudioPipe->binaryWritePtr();
             dirty = true;
+            switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "if datalen\n");
           }
         }
       }
@@ -617,6 +626,7 @@ extern "C" {
               pAudioPipe->binaryWritePtrAdd(bytes_written);
               available = pAudioPipe->binarySpaceAvailable();
               dirty = true;
+              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "out_len > 0\n");
             }
             if (available < pAudioPipe->binaryMinSpace()) {
               if (!tech_pvt->buffer_overrun_notified) {
@@ -624,13 +634,16 @@ extern "C" {
                 switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "(%u) dropping packets!\n", 
                   tech_pvt->id);
                 tech_pvt->responseHandler(session, EVENT_BUFFER_OVERRUN, NULL);
+                switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "if buffer_overrun_notified\n");
               }
+              switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "if available space less than binaryMinSpace, break\n");
               break;
             }
           }
         }
       }
 
+      switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "if tech_pvt->mutex equale to SWITCH_STATUS_SUCCESS");
       pAudioPipe->unlockAudioBuffer();
       switch_mutex_unlock(tech_pvt->mutex);
     }
