@@ -197,6 +197,7 @@ namespace {
                 switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "sending initial metadata %s\n", tech_pvt->initialMetadata);
                 AudioPipe *pAudioPipe = static_cast<AudioPipe *>(tech_pvt->pAudioPipe);
                 pAudioPipe->bufferForSending(tech_pvt->initialMetadata);
+                switch_core_media_bug_flush(bug);
               }
             break;
             case AudioPipe::CONNECT_FAIL:
