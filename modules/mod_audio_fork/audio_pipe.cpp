@@ -206,32 +206,13 @@ int AudioPipe::lws_callback(struct lws *wsi,
         {
           std::lock_guard<std::mutex> lk(ap->m_audio_mutex);
           if (ap->m_audio_buffer_write_offset > LWS_PRE) {
-              char *out;
-              cJSON *obj, *media;
-              obj = cJSON_CreateObject();
-              media = cJSON_CreateObject();
-              cJSON_AddItemToObject(obj, "event", cJSON_CreateString("media"));
-              cJSON_AddItemToObject(obj, "streamSid", cJSON_CreateString(ap->streamSid.c_str()));
-              cJSON_AddItemToObject(obj, "sequenceNumber", cJSON_CreateNumber(ap->sequenceNumber));
-              cJSON_AddItemToObject(obj, "media", media);
-              std::string audioStr = drachtio::base64_encode((unsigned char*) ap->m_audio_buffer, ap->m_audio_buffer_write_offset - LWS_PRE);
-              cJSON_AddItemToObject(media, "payload", cJSON_CreateString(audioStr.c_str()));
-              cJSON_AddItemToObject(media, "track", cJSON_CreateString(ap->track.c_str()));
-              cJSON_AddItemToObject(media, "chunk", cJSON_CreateNumber(ap->mediaChunk));
-              out = cJSON_PrintUnformatted(obj);
-              std::string jsonData(out);
-              uint8_t buf[jsonData.length() + LWS_PRE];
-              memcpy(buf + LWS_PRE, jsonData.c_str(), jsonData.length());
-              int datalen = jsonData.length();
-              int sent = lws_write(wsi, buf + LWS_PRE, datalen, LWS_WRITE_TEXT);
+              size_t datalen = ap->m_audio_buffer_write_offset - LWS_PRE;
+              int sent = lws_write(wsi, (unsigned char *) ap->m_audio_buffer + LWS_PRE, datalen, LWS_WRITE_BINARY);
               if (sent < datalen) {
-               lwsl_err("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_WRITEABLE %s attemped to send %lu only sent %d wsi %p..\n",
+              lwsl_err("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_WRITEABLE %s attemped to send %lu only sent %d wsi %p..\n", 
                 ap->m_uuid.c_str(), datalen, sent, wsi); 
               }
-              cJSON_Delete(obj);
-              ap->sequenceNumber++;
-              ap->mediaChunk++;
-            ap->m_audio_buffer_write_offset = LWS_PRE;
+              ap->m_audio_buffer_write_offset = LWS_PRE;              
           }
         }
 
