@@ -180,7 +180,7 @@ static switch_status_t send_text(switch_core_session_t *session, char* text) {
   return status;
 }
 
-#define FORK_API_SYNTAX "<uuid> [start | stop | send_text | pause | resume | graceful-shutdown ] [wss-url | path] [mono | mixed | stereo] [8000 | 16000 | 24000 | 32000 | 64000] [streamID] [accID] [callSid] [track] [metadata]"
+#define FORK_API_SYNTAX "<uuid> [start | stop | send_text | pause | resume | graceful-shutdown ] [wss-url | path] [mono | mixed | stereo] [8000 | 16000 | 24000 | 32000 | 64000] [streamID] [ccId] [interactionId] [track] [metadata]"
 SWITCH_STANDARD_API(fork_function)
 {
 	char *mycmd = NULL, *argv[10] = { 0 };
@@ -232,8 +232,8 @@ SWITCH_STANDARD_API(fork_function)
         int sampling = 8000;
       	switch_media_bug_flag_t flags = SMBF_READ_STREAM ;
       	char *streamID = argc > 5 ? argv[5] : NULL ;
-      	char *accID = argc > 6 ? argv[6] : NULL ;
-      	char *callSid = argc > 7 ? argv[7]: NULL;
+      	char *ccId = argc > 6 ? argv[6] : NULL ;
+      	char *interactionId = argc > 7 ? argv[7]: NULL;
         char *track = argc > 8 ? argv[8] : NULL ;
         char *metadata = argc > 9 ? argv[9] : NULL ;
         char *codec = NULL;
@@ -284,11 +284,13 @@ SWITCH_STANDARD_API(fork_function)
                 cJSON_AddItemToObject(obj, "streamSid", cJSON_CreateString(streamID));
                 cJSON_AddItemToObject(start, "streamSid", cJSON_CreateString(streamID));
             }
-            if(accID){
-                cJSON_AddItemToObject(start, "accountSid", cJSON_CreateString(accID));
+            if(ccId){
+                cJSON_AddItemToObject(start, "accountSid", cJSON_CreateString(ccId));
+                cJSON_AddItemToObject(start, "ccId", cJSON_CreateString(ccId));
             }
-            if(callSid){
-                cJSON_AddItemToObject(start, "callSid", cJSON_CreateString(callSid));
+            if(interactionId){
+                cJSON_AddItemToObject(start, "callSid", cJSON_CreateString(interactionId));
+                cJSON_AddItemToObject(start, "interactionId", cJSON_CreateString(interactionId));
             }
             if(metadata){
                 custom = cJSON_Parse(metadata);
