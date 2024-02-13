@@ -279,7 +279,14 @@ SWITCH_STANDARD_API(transcribe2_function)
 	if (!zstr(cmd) && (mycmd = strdup(cmd))) {
 		argc = switch_separate_string(mycmd, ' ', argv, (sizeof(argv) / sizeof(argv[0])));
 	}
-
+    TRANSCRIBE_EVENT_RESULTS = TRANSCRIBE_EVENT_RESULTS + "2""
+    TRANSCRIBE_EVENT_RESULTS
+TRANSCRIBE_EVENT_END_OF_UTTERANCE
+TRANSCRIBE_EVENT_START_OF_TRANSCRIPT
+TRANSCRIBE_EVENT_END_OF_TRANSCRIPT
+TRANSCRIBE_EVENT_NO_AUDIO_DETECTED
+TRANSCRIBE_EVENT_MAX_DURATION_EXCEEDED
+TRANSCRIBE_EVENT_PLAY_INTERRUPT
 	if (zstr(cmd) || 
       (!strcasecmp(argv[1], "stop") && argc < 2) ||
       (!strcasecmp(argv[1], "start") && argc < 9) ||
