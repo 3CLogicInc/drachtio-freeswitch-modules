@@ -7,7 +7,6 @@
 #include "google_glue.h"
 #include <stdlib.h>
 #include <switch.h>
-#define EventsLength 50
 
 int isApi2 = 0
 /* Prototypes */
