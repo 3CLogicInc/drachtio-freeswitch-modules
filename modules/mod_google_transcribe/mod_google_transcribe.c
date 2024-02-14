@@ -7,7 +7,9 @@
 #include "google_glue.h"
 #include <stdlib.h>
 #include <switch.h>
+#define EventsLength 50
 
+int isApi2 = 0
 /* Prototypes */
 SWITCH_MODULE_SHUTDOWN_FUNCTION(mod_transcribe_shutdown);
 SWITCH_MODULE_RUNTIME_FUNCTION(mod_transcribe_runtime);
@@ -17,33 +19,52 @@ SWITCH_MODULE_DEFINITION(mod_google_transcribe, mod_transcribe_load, mod_transcr
 
 static switch_status_t do_stop(switch_core_session_t *session);
 
-
 static void responseHandler(switch_core_session_t* session, const char * json) {
 	switch_event_t *event;
 	switch_channel_t *channel = switch_core_session_get_channel(session);
-
+    char event[EventsLength];
 	if (0 == strcmp("end_of_utterance", json)) {
-		switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, TRANSCRIBE_EVENT_END_OF_UTTERANCE);
+		strcpy(event, TRANSCRIBE_EVENT_END_OF_UTTERANCE);
+		if (isApi2) {
+           strcat(event, "2")
+		}
+		switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, event);
 		switch_channel_event_set_data(channel, event);
 		switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "transcription-vendor", "google");
 	}
 	else if (0 == strcmp("end_of_transcript", json)) {
-		switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, TRANSCRIBE_EVENT_END_OF_TRANSCRIPT);
+		strcpy(event, TRANSCRIBE_EVENT_END_OF_TRANSCRIPT);
+		if (isApi2) {
+           strcat(event, "2")
+		}
+		switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, event);
 		switch_channel_event_set_data(channel, event);
 		switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "transcription-vendor", "google");
 	}
 	else if (0 == strcmp("start_of_transcript", json)) {
-		switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, TRANSCRIBE_EVENT_START_OF_TRANSCRIPT);
+		strcpy(event, TRANSCRIBE_EVENT_START_OF_TRANSCRIPT);
+		if (isApi2) {
+           strcat(event, "2")
+		}
+		switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, event);
 		switch_channel_event_set_data(channel, event);
 		switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "transcription-vendor", "google");
 	}
 	else if (0 == strcmp("max_duration_exceeded", json)) {
-		switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, TRANSCRIBE_EVENT_MAX_DURATION_EXCEEDED);
+		strcpy(event, TRANSCRIBE_EVENT_MAX_DURATION_EXCEEDED);
+		if (isApi2) {
+           strcat(event, "2")
+		}
+		switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, event);
 		switch_channel_event_set_data(channel, event);
 		switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "transcription-vendor", "google");
 	}
 	else if (0 == strcmp("no_audio", json)) {
-		switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, TRANSCRIBE_EVENT_NO_AUDIO_DETECTED);
+		strcpy(event, TRANSCRIBE_EVENT_NO_AUDIO_DETECTED);
+		if (isApi2) {
+           strcat(event, "2")
+		}
+		switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, event);
 		switch_channel_event_set_data(channel, event);
 		switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "transcription-vendor", "google");
 	}
@@ -57,14 +78,21 @@ static void responseHandler(switch_core_session_t* session, const char * json) {
 		}else{
 			switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "unable to create play inturrupt event \n");
 		}
-		switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, TRANSCRIBE_EVENT_PLAY_INTERRUPT);
+		strcpy(event, TRANSCRIBE_EVENT_PLAY_INTERRUPT);
+		if (isApi2) {
+           strcat(event, "2")
+		}
+		switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, event);
 		switch_channel_event_set_data(channel, event);
 		switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "transcription-vendor", "google");
 	}
 	else {
 		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "json payload: %s.\n", json);
-
-		switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, TRANSCRIBE_EVENT_RESULTS);
+        strcpy(event, TRANSCRIBE_EVENT_RESULTS);
+		if (isApi2) {
+           strcat(event, "2")
+		}
+		switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, event);
 		switch_channel_event_set_data(channel, event);
 		switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "transcription-vendor", "google");
 		switch_event_add_body(event, "%s", json);
@@ -272,20 +300,13 @@ SWITCH_STANDARD_API(transcribe2_function)
 	char* hints = NULL;
 	char* model = NULL;
 	char* play_file = NULL;
-	
+	isApi2 = 1;
 	switch_status_t status = SWITCH_STATUS_FALSE;
 	switch_media_bug_flag_t flags = SMBF_READ_STREAM /* | SMBF_WRITE_STREAM | SMBF_READ_PING */;
 
 	if (!zstr(cmd) && (mycmd = strdup(cmd))) {
 		argc = switch_separate_string(mycmd, ' ', argv, (sizeof(argv) / sizeof(argv[0])));
 	}
-	strcat(TRANSCRIBE_EVENT_RESULTS, "2");
-	strcat(TRANSCRIBE_EVENT_END_OF_UTTERANCE, "2");
-	strcat(TRANSCRIBE_EVENT_START_OF_TRANSCRIPT, "2");
-	strcat(TRANSCRIBE_EVENT_END_OF_TRANSCRIPT, "2");
-	strcat(TRANSCRIBE_EVENT_NO_AUDIO_DETECTED, "2");
-	strcat(TRANSCRIBE_EVENT_MAX_DURATION_EXCEEDED, "2");
-	strcat(TRANSCRIBE_EVENT_PLAY_INTERRUPT, "2");
 	if (zstr(cmd) || 
       (!strcasecmp(argv[1], "stop") && argc < 2) ||
       (!strcasecmp(argv[1], "start") && argc < 9) ||
