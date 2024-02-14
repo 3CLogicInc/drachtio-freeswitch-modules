@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <switch.h>
 
-int isApi2 = 0
+int isApi2 = 0;
 /* Prototypes */
 SWITCH_MODULE_SHUTDOWN_FUNCTION(mod_transcribe_shutdown);
 SWITCH_MODULE_RUNTIME_FUNCTION(mod_transcribe_runtime);
