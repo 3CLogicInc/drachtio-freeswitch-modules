@@ -7,7 +7,7 @@
 #include <unistd.h>
 
 #define MAX_SESSION_ID (256)
-
+#define EventsLength 50
 #define MY_BUG_NAME "google_transcribe"
 #define TRANSCRIBE_EVENT_RESULTS "google_transcribe::transcription"
 #define TRANSCRIBE_EVENT_END_OF_UTTERANCE "google_transcribe::end_of_utterance"
