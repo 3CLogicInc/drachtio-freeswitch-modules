@@ -198,7 +198,7 @@ static void *SWITCH_THREAD_FUNC grpc_read_thread(switch_thread_t *thread, void *
     }
     
     if (cb->play_file == 1){
-      cb->responseHandler(session, "play_interrupt");
+      cb->responseHandler(session, "play_interrupt", cb->isApi2);
     }
     
     for (int r = 0; r < response.results_size(); ++r) {
@@ -241,7 +241,7 @@ static void *SWITCH_THREAD_FUNC grpc_read_thread(switch_thread_t *thread, void *
       }
 
       char* json = cJSON_PrintUnformatted(jResult);
-      cb->responseHandler(session, (const char *) json);
+      cb->responseHandler(session, (const char *) json, cb->isApi2);
       free(json);
 
       cJSON_Delete(jResult);
@@ -250,7 +250,7 @@ static void *SWITCH_THREAD_FUNC grpc_read_thread(switch_thread_t *thread, void *
     if (speech_event_type == StreamingRecognizeResponse_SpeechEventType_END_OF_SINGLE_UTTERANCE) {
       // we only get this when we have requested it, and recognition stops after we get this
       switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "grpc_read_thread: got end_of_utterance\n") ;
-      cb->responseHandler(session, "end_of_utterance");
+      cb->responseHandler(session, "end_of_utterance", cb->isApi2);
       cb->end_of_utterance = 1;
       streamer->writesDone();
     }
@@ -267,10 +267,10 @@ static void *SWITCH_THREAD_FUNC grpc_read_thread(switch_thread_t *thread, void *
       grpc::Status status = streamer->finish();
       if (11 == status.error_code()) {
         if (std::string::npos != status.error_message().find("Exceeded maximum allowed stream duration")) {
-          cb->responseHandler(session, "max_duration_exceeded");
+          cb->responseHandler(session, "max_duration_exceeded", cb->isApi2);
         }
         else {
-          cb->responseHandler(session, "no_audio");
+          cb->responseHandler(session, "no_audio", cb->isApi2);
         }
       }
       switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "grpc_read_thread: finish() status %s (%d)\n", status.error_message().c_str(), status.error_code()) ;

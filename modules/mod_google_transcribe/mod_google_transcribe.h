@@ -34,7 +34,7 @@ struct cap_cb {
 };
 #else
 /* per-channel data */
-typedef void (*responseHandler_t)(switch_core_session_t* session, const char* json);
+typedef void (*responseHandler_t)(switch_core_session_t* session, const char* json, int isApi2);
 
 struct cap_cb {
 	switch_mutex_t *mutex;
