@@ -9,6 +9,7 @@
 #define MAX_SESSION_ID (256)
 
 #define MY_BUG_NAME "google_transcribe"
+#define EventsLength 50
 #define TRANSCRIBE_EVENT_RESULTS "google_transcribe::transcription"
 #define TRANSCRIBE_EVENT_END_OF_UTTERANCE "google_transcribe::end_of_utterance"
 #define TRANSCRIBE_EVENT_START_OF_TRANSCRIPT "google_transcribe::start_of_transcript"

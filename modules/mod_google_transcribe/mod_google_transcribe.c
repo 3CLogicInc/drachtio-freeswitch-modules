@@ -21,29 +21,53 @@ static switch_status_t do_stop(switch_core_session_t *session);
 static void responseHandler(switch_core_session_t* session, const char * json) {
 	switch_event_t *event;
 	switch_channel_t *channel = switch_core_session_get_channel(session);
-
+	bool isRTT = false;
+    if (switch_true(switch_channel_get_variable(channel, "isRTT"))) {
+           isRTT = true;
+	}
+    char eventName[EventsLength];
 	if (0 == strcmp("end_of_utterance", json)) {
-		switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, TRANSCRIBE_EVENT_END_OF_UTTERANCE);
+		strcpy(eventName, TRANSCRIBE_EVENT_END_OF_UTTERANCE);
+		if (isRTT) {
+           strcat(eventName, "2");
+		}
+		switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, eventName);
 		switch_channel_event_set_data(channel, event);
 		switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "transcription-vendor", "google");
 	}
 	else if (0 == strcmp("end_of_transcript", json)) {
-		switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, TRANSCRIBE_EVENT_END_OF_TRANSCRIPT);
+		strcpy(eventName, TRANSCRIBE_EVENT_END_OF_TRANSCRIPT);
+		if (isRTT) {
+           strcat(eventName, "2");
+		}
+		switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, eventName);
 		switch_channel_event_set_data(channel, event);
 		switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "transcription-vendor", "google");
 	}
 	else if (0 == strcmp("start_of_transcript", json)) {
-		switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, TRANSCRIBE_EVENT_START_OF_TRANSCRIPT);
+		strcpy(eventName, TRANSCRIBE_EVENT_START_OF_TRANSCRIPT);
+		if (isRTT) {
+           strcat(eventName, "2");
+		}
+		switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, eventName);
 		switch_channel_event_set_data(channel, event);
 		switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "transcription-vendor", "google");
 	}
 	else if (0 == strcmp("max_duration_exceeded", json)) {
-		switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, TRANSCRIBE_EVENT_MAX_DURATION_EXCEEDED);
+		strcpy(eventName, TRANSCRIBE_EVENT_MAX_DURATION_EXCEEDED);
+		if (isRTT) {
+           strcat(eventName, "2");
+		}
+		switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, eventName);
 		switch_channel_event_set_data(channel, event);
 		switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "transcription-vendor", "google");
 	}
 	else if (0 == strcmp("no_audio", json)) {
-		switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, TRANSCRIBE_EVENT_NO_AUDIO_DETECTED);
+		strcpy(eventName, TRANSCRIBE_EVENT_NO_AUDIO_DETECTED);
+		if (isRTT) {
+           strcat(eventName, "2");
+		}
+		switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, eventName);
 		switch_channel_event_set_data(channel, event);
 		switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "transcription-vendor", "google");
 	}
@@ -57,14 +81,22 @@ static void responseHandler(switch_core_session_t* session, const char * json) {
 		}else{
 			switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "unable to create play inturrupt event \n");
 		}
-		switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, TRANSCRIBE_EVENT_PLAY_INTERRUPT);
+		strcpy(eventName, TRANSCRIBE_EVENT_PLAY_INTERRUPT);
+		if (isRTT) {
+           strcat(eventName, "2");
+		}
+		switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, eventName);
 		switch_channel_event_set_data(channel, event);
 		switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "transcription-vendor", "google");
 	}
 	else {
 		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "json payload: %s.\n", json);
-
-		switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, TRANSCRIBE_EVENT_RESULTS);
+        strcpy(eventName, TRANSCRIBE_EVENT_RESULTS);
+		if (isRTT) {
+           strcat(eventName, "2");
+		}
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "eventName from transcribe: %s.\n", eventName);
+		switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, eventName);
 		switch_channel_event_set_data(channel, event);
 		switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "transcription-vendor", "google");
 		switch_event_add_body(event, "%s", json);
