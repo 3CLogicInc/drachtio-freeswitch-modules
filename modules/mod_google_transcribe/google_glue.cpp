@@ -301,7 +301,7 @@ extern "C" {
     switch_status_t google_speech_session_init(switch_core_session_t *session, responseHandler_t responseHandler, 
           uint32_t samples_per_second, uint32_t channels, char* lang, int interim, int single_utterence,
           int separate_recognition, int max_alternatives, int profinity_filter, int word_time_offset,
-          int punctuation, char* model, int enhanced, char* hints, char* play_file, void **ppUserData) {
+          int punctuation, char* model, int enhanced, char* hints, char* play_file, void **ppUserData, int isApi2) {
 
       switch_channel_t *channel = switch_core_session_get_channel(session);
       struct cap_cb *cb;
@@ -313,7 +313,7 @@ extern "C" {
       if (play_file != NULL){
         cb->play_file = 1;
       }
-      
+      cb->isApi2 = isApi2;
       switch_mutex_init(&cb->mutex, SWITCH_MUTEX_NESTED, switch_core_session_get_pool(session));
 
       GStreamer *streamer = NULL;

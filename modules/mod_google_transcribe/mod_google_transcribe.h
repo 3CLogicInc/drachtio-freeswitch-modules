@@ -46,6 +46,7 @@ struct cap_cb {
 	switch_thread_t* thread;
 	int end_of_utterance;
 	int play_file;
+	int isApi2;
 };
 #endif
 
