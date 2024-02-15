@@ -29,7 +29,7 @@ static void responseHandler(switch_core_session_t* session, const char * json) {
 	if (0 == strcmp("end_of_utterance", json)) {
 		strcpy(eventName, TRANSCRIBE_EVENT_END_OF_UTTERANCE);
 		if (isRTT) {
-           strcat(eventName, "2");
+           strcat(eventName, "_api");
 		}
 		switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, eventName);
 		switch_channel_event_set_data(channel, event);
@@ -38,7 +38,7 @@ static void responseHandler(switch_core_session_t* session, const char * json) {
 	else if (0 == strcmp("end_of_transcript", json)) {
 		strcpy(eventName, TRANSCRIBE_EVENT_END_OF_TRANSCRIPT);
 		if (isRTT) {
-           strcat(eventName, "2");
+           strcat(eventName, "_api");
 		}
 		switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, eventName);
 		switch_channel_event_set_data(channel, event);
@@ -47,7 +47,7 @@ static void responseHandler(switch_core_session_t* session, const char * json) {
 	else if (0 == strcmp("start_of_transcript", json)) {
 		strcpy(eventName, TRANSCRIBE_EVENT_START_OF_TRANSCRIPT);
 		if (isRTT) {
-           strcat(eventName, "2");
+           strcat(eventName, "_api");
 		}
 		switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, eventName);
 		switch_channel_event_set_data(channel, event);
@@ -56,7 +56,7 @@ static void responseHandler(switch_core_session_t* session, const char * json) {
 	else if (0 == strcmp("max_duration_exceeded", json)) {
 		strcpy(eventName, TRANSCRIBE_EVENT_MAX_DURATION_EXCEEDED);
 		if (isRTT) {
-           strcat(eventName, "2");
+           strcat(eventName, "_api");
 		}
 		switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, eventName);
 		switch_channel_event_set_data(channel, event);
@@ -65,7 +65,7 @@ static void responseHandler(switch_core_session_t* session, const char * json) {
 	else if (0 == strcmp("no_audio", json)) {
 		strcpy(eventName, TRANSCRIBE_EVENT_NO_AUDIO_DETECTED);
 		if (isRTT) {
-           strcat(eventName, "2");
+           strcat(eventName, "_api");
 		}
 		switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, eventName);
 		switch_channel_event_set_data(channel, event);
@@ -83,7 +83,7 @@ static void responseHandler(switch_core_session_t* session, const char * json) {
 		}
 		strcpy(eventName, TRANSCRIBE_EVENT_PLAY_INTERRUPT);
 		if (isRTT) {
-           strcat(eventName, "2");
+           strcat(eventName, "_api");
 		}
 		switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, eventName);
 		switch_channel_event_set_data(channel, event);
@@ -93,7 +93,7 @@ static void responseHandler(switch_core_session_t* session, const char * json) {
 		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "json payload: %s.\n", json);
         strcpy(eventName, TRANSCRIBE_EVENT_RESULTS);
 		if (isRTT) {
-           strcat(eventName, "2");
+           strcat(eventName, "_api");
 		}
 		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "eventName from transcribe: %s.\n", eventName);
 		switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, eventName);
