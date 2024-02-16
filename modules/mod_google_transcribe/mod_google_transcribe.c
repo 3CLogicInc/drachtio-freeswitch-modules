@@ -97,7 +97,7 @@ static void responseHandler(switch_core_session_t* session, const char * json) {
 	else {
 		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "json payload: %s.\n", json);
 		if (isRTT) {
-           switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, TRANSCRIBE_EVENT_RESULTS_2);
+           switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, TRANSCRIBE_EVENT_RESULTS);
 		   switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "eventName from transcribe: %s.\n", TRANSCRIBE_EVENT_RESULTS_2);
 		}
 		else {
