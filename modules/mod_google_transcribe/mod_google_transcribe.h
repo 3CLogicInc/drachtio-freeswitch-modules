@@ -17,13 +17,13 @@
 #define TRANSCRIBE_EVENT_MAX_DURATION_EXCEEDED "google_transcribe::max_duration_exceeded"
 #define TRANSCRIBE_EVENT_PLAY_INTERRUPT "google_transcribe::play_interrupt"
 
-#define TRANSCRIBE_EVENT_RESULTS_2 "google_trans::transcription"
-#define TRANSCRIBE_EVENT_END_OF_UTTERANCE_2 "google_trans::end_of_utterance"
-#define TRANSCRIBE_EVENT_START_OF_TRANSCRIPT_2 "google_transc::start_of_transcript"
-#define TRANSCRIBE_EVENT_END_OF_TRANSCRIPT_2 "google_trans::end_of_transcript"
-#define TRANSCRIBE_EVENT_NO_AUDIO_DETECTED_2 "google_trans::no_audio_detected"
-#define TRANSCRIBE_EVENT_MAX_DURATION_EXCEEDED_2 "google_trans::max_duration_exceeded"
-#define TRANSCRIBE_EVENT_PLAY_INTERRUPT_2 "google_trans::play_interrupt"
+#define TRANSCRIBE_EVENT_RESULTS_2 "google_transcribe::transcription2"
+#define TRANSCRIBE_EVENT_END_OF_UTTERANCE_2 "google_transcribe::end_of_utterance2"
+#define TRANSCRIBE_EVENT_START_OF_TRANSCRIPT_2 "google_transcribe::start_of_transcript2"
+#define TRANSCRIBE_EVENT_END_OF_TRANSCRIPT_2 "google_transcribe::end_of_transcript2"
+#define TRANSCRIBE_EVENT_NO_AUDIO_DETECTED_2 "google_transcribe::no_audio_detected2"
+#define TRANSCRIBE_EVENT_MAX_DURATION_EXCEEDED_2 "google_transcribe::max_duration_exceeded2"
+#define TRANSCRIBE_EVENT_PLAY_INTERRUPT_2 "google_transcribe::play_interrupt2"
 
 // simply write a wave file
 //#define DEBUG_TRANSCRIBE 0
