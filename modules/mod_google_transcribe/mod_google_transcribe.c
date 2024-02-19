@@ -453,8 +453,8 @@ SWITCH_MODULE_LOAD_FUNCTION(mod_transcribe_load)
         return SWITCH_STATUS_TERM;
     }
     
-	if (switch_event_reserve_subclass(TRANSCRIBE_EVENT_RESULTS_2) != SWITCH_STATUS_SUCCESS) {
-		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Couldn't register subclass %s!\n", TRANSCRIBE_EVENT_RESULTS_2);
+	if (switch_event_reserve_subclass(TRANSCRIBE_EVENT_RESULTS) != SWITCH_STATUS_SUCCESS) {
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Couldn't register subclass %s!\n", TRANSCRIBE_EVENT_RESULTS);
 		return SWITCH_STATUS_TERM;
 	}
 	if (switch_event_reserve_subclass(TRANSCRIBE_EVENT_END_OF_UTTERANCE_2) != SWITCH_STATUS_SUCCESS) {
