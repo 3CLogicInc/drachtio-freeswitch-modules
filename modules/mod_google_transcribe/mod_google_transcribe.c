@@ -326,9 +326,8 @@ SWITCH_STANDARD_API(transcribe2_function)
 		stream->write_function(stream, "-USAGE: %s\n", TRANSCRIBE2_API_SYNTAX);
 		goto done;
 	} else {
-		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "start transcribing seperate channel : %s \n",argv[5]);
 		switch_core_session_t *lsession = NULL;
-
+        switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "start transcribing seperate channel : %s \n",argv[5]);
 		if ((lsession = switch_core_session_locate(argv[0]))) {
 			if (!strcasecmp(argv[1], "stop")) {
     		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "stop transcribing\n");
