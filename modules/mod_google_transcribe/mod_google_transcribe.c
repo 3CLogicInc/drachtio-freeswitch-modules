@@ -337,6 +337,7 @@ SWITCH_STANDARD_API(transcribe2_function)
         int interim = argc > 3 && !strcmp(argv[3], "true");
 		int single_utterence =  !strcmp(argv[4], "true"); // single-utterence
 		int sepreate_recognition = !strcmp(argv[5], "true"); // sepreate-recognition
+		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "start transcribing seperate channel : %s \n",argv[5]);
 		int max_alternatives = atoi(argv[6]); // max-alternatives
 		int profinity_filter = !strcmp(argv[7], "true"); // profinity-filter
 		int word_time_offset = !strcmp(argv[8], "true"); // word-time
