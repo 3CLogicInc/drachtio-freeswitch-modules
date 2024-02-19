@@ -18,7 +18,7 @@
 #define TRANSCRIBE_EVENT_PLAY_INTERRUPT "google_transcribe::play_interrupt"
 
 #define TRANSCRIBE_EVENT_RESULTS_2 "google_transcribe::transcriptionapi"
-#define TRANSCRIBE_EVENT_END_OF_UTTERANCE_2 "google_transcribe::end_of_utterance2api"
+#define TRANSCRIBE_EVENT_END_OF_UTTERANCE_2 "google_transcribe::end_of_utteranceapi"
 #define TRANSCRIBE_EVENT_START_OF_TRANSCRIPT_2 "google_transcribe::start_of_transcriptapi"
 #define TRANSCRIBE_EVENT_END_OF_TRANSCRIPT_2 "google_transcribe::end_of_transcriptapi"
 #define TRANSCRIBE_EVENT_NO_AUDIO_DETECTED_2 "google_transcribe::no_audio_detectedapi"
