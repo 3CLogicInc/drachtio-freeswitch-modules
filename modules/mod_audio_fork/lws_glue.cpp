@@ -20,6 +20,7 @@
 
 #define RTP_PACKETIZATION_PERIOD 20
 #define FRAME_SIZE_8000  320 /*which means each 20ms frame as 320 bytes at 8 khz (1 channel only)*/
+extern "C" switch_status_t fork_session_cleanup(switch_core_session_t *session, char* text, int channelIsClosing);
 
 namespace {
   static const char *requestedBufferSecs = std::getenv("MOD_AUDIO_FORK_BUFFER_SECS");
@@ -211,6 +212,7 @@ namespace {
             break;
             case AudioPipe::CONNECTION_DROPPED:
               // first thing: we can no longer access the AudioPipe
+              fork_session_cleanup(session, "stop", 0);
               tech_pvt->pAudioPipe = nullptr;
               tech_pvt->responseHandler(session, EVENT_DISCONNECT, NULL);
               switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "connection dropped from far end\n");
