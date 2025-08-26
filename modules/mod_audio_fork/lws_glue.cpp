@@ -170,6 +170,18 @@ namespace {
         char* jsonString = cJSON_PrintUnformatted(json);
           tech_pvt->responseHandler(session, EVENT_END_OF_INTERACTION, jsonString);
           free(jsonString);
+      } else if (0 == event.compare("partialSpeechResult")) {
+        char* jsonString = cJSON_PrintUnformatted(json);
+          tech_pvt->responseHandler(session, EVENT_PARTIAL_SPEECH_RESULT, jsonString);
+          free(jsonString);
+      } else if (0 == event.compare("endOfUtterance")) {
+        char* jsonString = cJSON_PrintUnformatted(json);
+          tech_pvt->responseHandler(session, EVENT_END_OF_UTTERANCE, jsonString);
+          free(jsonString);
+      } else if (0 == event.compare("startOfTranscript")) {
+        char* jsonString = cJSON_PrintUnformatted(json);
+          tech_pvt->responseHandler(session, EVENT_START_OF_TRANSCRIPT, jsonString);
+          free(jsonString);
       }
       else if (0 == event.compare("clear")){
           // clear event
