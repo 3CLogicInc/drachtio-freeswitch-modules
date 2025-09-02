@@ -35,7 +35,7 @@ static switch_media_bug_callback_t get_bug_callback_from_version(GoogleCloudServ
 		case GoogleCloudServiceVersion_v2:
 			return capture_callback_v2;
 		default:
-			return capture_callback_v1;
+			return capture_callback_v2;
 	}
 }
 
@@ -46,7 +46,7 @@ static speech_cleanup_callback_t get_cleanup_callback_from_version(GoogleCloudSe
 		case GoogleCloudServiceVersion_v2:
 			return google_speech_session_cleanup_v2;
 		default:
-			return google_speech_session_cleanup_v1;
+			return google_speech_session_cleanup_v2;
 	}
 }
 
@@ -57,7 +57,7 @@ static speech_init_callback_t get_init_callback_from_version(GoogleCloudServiceV
 		case GoogleCloudServiceVersion_v2:
 			return google_speech_session_init_v2;
 		default:
-			return google_speech_session_init_v1;
+			return google_speech_session_init_v2;
 	}
 }
 
@@ -368,7 +368,7 @@ SWITCH_STANDARD_API(transcribe2_function)
 	switch_media_bug_flag_t flags = SMBF_READ_STREAM /* | SMBF_WRITE_STREAM | SMBF_READ_PING */;
 	switch_channel_t *channel;
 	const char* var;
-	GoogleCloudServiceVersion version = GoogleCloudServiceVersion_v1;
+	GoogleCloudServiceVersion version = GoogleCloudServiceVersion_v2;
 
 	if (!zstr(cmd) && (mycmd = strdup(cmd))) {
 		argc = switch_separate_string(mycmd, ' ', argv, (sizeof(argv) / sizeof(argv[0])));
@@ -392,6 +392,7 @@ SWITCH_STANDARD_API(transcribe2_function)
 				else if (!strcasecmp(var, "v2"))
 					version = GoogleCloudServiceVersion_v2;
 			}
+			version = GoogleCloudServiceVersion_v2;
 
 			if (!strcasecmp(argv[1], "stop")) {
     		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "stop transcribing\n");
@@ -447,7 +448,7 @@ SWITCH_STANDARD_API(transcribe_function)
 	switch_media_bug_flag_t flags = SMBF_READ_STREAM /* | SMBF_WRITE_STREAM | SMBF_READ_PING */;
 	switch_channel_t *channel;
 	const char* var;
-	GoogleCloudServiceVersion version = GoogleCloudServiceVersion_v1;
+	GoogleCloudServiceVersion version = GoogleCloudServiceVersion_v2;
 
 	if (!zstr(cmd) && (mycmd = strdup(cmd))) {
 		argc = switch_separate_string(mycmd, ' ', argv, (sizeof(argv) / sizeof(argv[0])));
@@ -471,6 +472,7 @@ SWITCH_STANDARD_API(transcribe_function)
 				else if (!strcasecmp(var, "v2"))
 					version = GoogleCloudServiceVersion_v2;
 			}
+			version = GoogleCloudServiceVersion_v2;
 
 			if (!strcasecmp(argv[1], "stop")) {
 				char *bugname = argc > 2 ? argv[2] : MY_BUG_NAME;

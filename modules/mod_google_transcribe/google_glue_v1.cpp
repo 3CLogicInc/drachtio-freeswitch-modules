@@ -15,9 +15,9 @@ using google::cloud::speech::v1p1beta1::SpeechContext;
 using google::cloud::speech::v1p1beta1::StreamingRecognizeRequest;
 using google::cloud::speech::v1p1beta1::StreamingRecognizeResponse;
 using google::cloud::speech::v1p1beta1::SpeakerDiarizationConfig;
-using google::cloud::speech::v1p1beta1::SpeechAdaptation;
-using google::cloud::speech::v1p1beta1::PhraseSet;
-using google::cloud::speech::v1p1beta1::PhraseSet_Phrase;
+// using google::cloud::speech::v1p1beta1::SpeechAdaptation;
+// using google::cloud::speech::v1p1beta1::PhraseSet;
+// using google::cloud::speech::v1p1beta1::PhraseSet_Phrase;
 using google::cloud::speech::v1p1beta1::RecognitionMetadata;
 using google::cloud::speech::v1p1beta1::RecognitionMetadata_InteractionType_DISCUSSION;
 using google::cloud::speech::v1p1beta1::RecognitionMetadata_InteractionType_PRESENTATION;
@@ -140,12 +140,13 @@ GStreamer<StreamingRecognizeRequest, StreamingRecognizeResponse, Speech::Stub>::
       switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(m_session), SWITCH_LOG_DEBUG, "use_enhanced\n");
     }
 
-    // hints  
-    if (hints != NULL) {
-      auto* adaptation = config->mutable_adaptation();
-      auto* phrase_set = adaptation->add_phrase_sets();
-      google_speech_configure_grammar_hints(m_session, channel, hints, phrase_set);
-    }
+    // hints
+    hints = NULL; 
+    // if (hints != NULL) {
+    //   auto* adaptation = config->mutable_adaptation();
+    //   auto* phrase_set = adaptation->add_phrase_sets();
+    //   google_speech_configure_grammar_hints(m_session, channel, hints, phrase_set);
+    // }
 
     const char* var;
     
