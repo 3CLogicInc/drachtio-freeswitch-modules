@@ -187,7 +187,7 @@ namespace {
       switch_channel_t *channel = switch_core_session_get_channel(session);
       switch_media_bug_t *bug = (switch_media_bug_t*) switch_channel_get_private(channel, MY_BUG_NAME);
       if (bug) {
-        private_t* tech_pvt = (private_t*) switch_core_media_bug_get_user_data(bug);
+        private_t* tech_pvt = (private_t*) (bug);
         if (tech_pvt) {
           switch (event) {
             case AudioPipe::CONNECT_SUCCESS:
@@ -230,7 +230,7 @@ namespace {
     }
   }
   switch_status_t fork_data_init(private_t *tech_pvt, switch_core_session_t *session, char * host, 
-    unsigned int port, char* path, int sslFlags, int sampling, int desiredSampling, int channels, char* metadata, responseHandler_t responseHandler) {
+    unsigned int port, char* path, int sslFlags, int sampling, int desiredSampling, int channels, char* token, char* metadata, responseHandler_t responseHandler) {
 
     const char* username = nullptr;
     const char* password = nullptr;
@@ -258,12 +258,13 @@ namespace {
     tech_pvt->buffer_overrun_notified = 0;
     tech_pvt->audio_paused = 0;
     tech_pvt->graceful_shutdown = 0;
+    if (token) strncpy(tech_pvt->token, token, MAX_TOKEN_LEN);
     if (metadata) strncpy(tech_pvt->initialMetadata, metadata, MAX_METADATA_LEN);
-    
+
     size_t buflen = LWS_PRE + (FRAME_SIZE_8000 * desiredSampling / 8000 * channels * 1000 / RTP_PACKETIZATION_PERIOD * nAudioBufferSecs);
 
     AudioPipe* ap = new AudioPipe(tech_pvt->sessionId, host, port, path, sslFlags, 
-      buflen, read_impl.decoded_bytes_per_packet, username, password, eventCallback);
+      buflen, read_impl.decoded_bytes_per_packet, username, password, token, eventCallback);
     if (!ap) {
       switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "Error allocating AudioPipe\n");
       return SWITCH_STATUS_FALSE;
@@ -420,8 +421,9 @@ extern "C" {
               int sampling,
               int sslFlags,
               int channels,
-              char* streamSid,
+              char* streamSid, 
               char* trackValue,
+              char* token,
               char* metadata, 
               void **ppUserData)
   {    	
@@ -433,7 +435,7 @@ extern "C" {
       switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "error allocating memory!\n");
       return SWITCH_STATUS_FALSE;
     }
-    if (SWITCH_STATUS_SUCCESS != fork_data_init(tech_pvt, session, host, port, path, sslFlags, samples_per_second, sampling, channels, metadata, responseHandler)) {
+    if (SWITCH_STATUS_SUCCESS != fork_data_init(tech_pvt, session, host, port, path, sslFlags, samples_per_second, sampling, channels, token, metadata, responseHandler)) {
       destroy_tech_pvt(tech_pvt);
       return SWITCH_STATUS_FALSE;
     }

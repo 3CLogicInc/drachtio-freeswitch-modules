@@ -12,6 +12,8 @@
 #define MAX_SESSION_ID (256)
 #define MAX_WS_URL_LEN (512)
 #define MAX_PATH_LEN (128)
+#define MAX_TOKEN_LEN (4096)
+#define MAX_METADATA_LEN (8192)
 
 #define EVENT_TRANSCRIPTION      "mod_audio_fork::transcription"
 #define EVENT_TRANSFER           "mod_audio_fork::transfer"
@@ -55,7 +57,8 @@ struct private_data {
   int buffer_overrun_notified:1;
   int audio_paused:1;
   int graceful_shutdown:1;
-  char initialMetadata[8192];
+  char token[MAX_TOKEN_LEN];
+  char initialMetadata[MAX_METADATA_LEN];
 };
 
 typedef struct private_data private_t;
