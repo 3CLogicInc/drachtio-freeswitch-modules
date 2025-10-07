@@ -187,7 +187,7 @@ namespace {
       switch_channel_t *channel = switch_core_session_get_channel(session);
       switch_media_bug_t *bug = (switch_media_bug_t*) switch_channel_get_private(channel, MY_BUG_NAME);
       if (bug) {
-        private_t* tech_pvt = (private_t*) (bug);
+        private_t* tech_pvt = (private_t*) switch_core_media_bug_get_user_data(bug);
         if (tech_pvt) {
           switch (event) {
             case AudioPipe::CONNECT_SUCCESS:
