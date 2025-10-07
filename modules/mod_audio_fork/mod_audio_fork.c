@@ -184,7 +184,7 @@ static switch_status_t send_text(switch_core_session_t *session, char* text) {
 #define FORK_API_SYNTAX "<uuid> [start | stop | send_text | pause | resume | graceful-shutdown ] [wss-url | path] [mono | mixed | stereo] [8000 | 16000 | 24000 | 32000 | 64000] [streamID] [ccId] [interactionId] [track] [token] [metadata]"
 SWITCH_STANDARD_API(fork_function)
 {
-	char *mycmd = NULL, *argv[10] = { 0 };
+	char *mycmd = NULL, *argv[16] = { 0 };
 	int argc = 0;
 	switch_status_t status = SWITCH_STATUS_FALSE;
 
