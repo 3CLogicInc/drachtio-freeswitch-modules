@@ -87,6 +87,7 @@ static switch_status_t start_capture(switch_core_session_t *session,
         char* streamSid,
         char* trackValue,
         char* metadata,
+        char* token,
         const char* base)
 {
 	switch_channel_t *channel = switch_core_session_get_channel(session);
@@ -115,7 +116,7 @@ static switch_status_t start_capture(switch_core_session_t *session,
 
 	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "calling fork_session_init.\n");
 	if (SWITCH_STATUS_FALSE == fork_session_init(session, responseHandler, read_codec->implementation->actual_samples_per_second, 
-		host, port, path, sampling, sslFlags, channels, streamSid, trackValue, metadata, &pUserData)) {
+		host, port, path, sampling, sslFlags, channels, streamSid, trackValue, token, metadata, &pUserData)) {
 		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "Error initializing mod_audio_fork session.\n");
 		return SWITCH_STATUS_FALSE;
 	}
@@ -180,10 +181,10 @@ static switch_status_t send_text(switch_core_session_t *session, char* text) {
   return status;
 }
 
-#define FORK_API_SYNTAX "<uuid> [start | stop | send_text | pause | resume | graceful-shutdown ] [wss-url | path] [mono | mixed | stereo] [8000 | 16000 | 24000 | 32000 | 64000] [streamID] [ccId] [interactionId] [track] [metadata]"
+#define FORK_API_SYNTAX "<uuid> [start | stop | send_text | pause | resume | graceful-shutdown ] [wss-url | path] [mono | mixed | stereo] [8000 | 16000 | 24000 | 32000 | 64000] [streamID] [ccId] [interactionId] [track] [token] [metadata]"
 SWITCH_STANDARD_API(fork_function)
 {
-	char *mycmd = NULL, *argv[10] = { 0 };
+	char *mycmd = NULL, *argv[16] = { 0 };
 	int argc = 0;
 	switch_status_t status = SWITCH_STATUS_FALSE;
 
@@ -235,7 +236,8 @@ SWITCH_STANDARD_API(fork_function)
       	char *ccId = argc > 6 ? argv[6] : NULL ;
       	char *interactionId = argc > 7 ? argv[7]: NULL;
         char *track = argc > 8 ? argv[8] : NULL ;
-        char *metadata = argc > 9 ? argv[9] : NULL ;
+        char *token = argc > 9 ? argv[9] : NULL ;
+        char *metadata = argc > 10 ? argv[10] : NULL ;
         char *codec = NULL;
 
         if (0 == strcmp(argv[3], "mixed")) {
@@ -296,6 +298,9 @@ SWITCH_STANDARD_API(fork_function)
                 custom = cJSON_Parse(metadata);
                 cJSON_AddItemToObject(start, "customParameters", custom);
             }
+            if(token){
+                cJSON_AddItemToObject(start, "token", cJSON_CreateString(token));
+            }
             cJSON_AddItemToObject(start, "tracks", tracks);
             if(track){
                 if (0 == strcmp(track, "both_tracks")){
@@ -334,7 +339,7 @@ SWITCH_STANDARD_API(fork_function)
             }
             out = cJSON_Print(obj);
 
-            status = start_capture(lsession, flags, host, port, path, sampling, sslFlags, streamID , trackValue, out, "mod_audio_fork");
+            status = start_capture(lsession, flags, host, port, path, sampling, sslFlags, streamID , trackValue, out, token, "mod_audio_fork");
 
             cJSON_Delete(obj);
         }

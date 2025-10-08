@@ -39,7 +39,7 @@ public:
 
   // constructor
   AudioPipe(const char* uuid, const char* host, unsigned int port, const char* path, int sslFlags, 
-    size_t bufLen, size_t minFreespace, const char* username, const char* password, notifyHandler_t callback);
+    size_t bufLen, size_t minFreespace, const char* username, const char* password, const char* token, notifyHandler_t callback);
   ~AudioPipe();  
 
   LwsState_t getLwsState(void) { return m_state; }
@@ -123,6 +123,7 @@ private:
   std::string m_host;
   unsigned int m_port;
   std::string m_path;
+  std::string m_token;
   std::string m_metadata;
   std::mutex m_text_mutex;
   std::mutex m_audio_mutex;

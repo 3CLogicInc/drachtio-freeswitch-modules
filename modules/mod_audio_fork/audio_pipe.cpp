@@ -52,6 +52,10 @@ int AudioPipe::lws_callback(struct lws *wsi,
     case LWS_CALLBACK_CLIENT_APPEND_HANDSHAKE_HEADER:
       {
         AudioPipe* ap = findPendingConnect(wsi);
+        if (ap && ap->m_token.length() > 0) {
+          unsigned char **p = (unsigned char **)in, *end = (*p) + len;
+          if (lws_add_http_header_by_token(wsi, WSI_TOKEN_HTTP_AUTHORIZATION, (unsigned char *)ap->m_token.c_str(), ap->m_token.length(), p, end)) return -1;
+        }
         if (ap && ap->hasBasicAuth()) {
           unsigned char **p = (unsigned char **)in, *end = (*p) + len;
           char b[128];
@@ -432,7 +436,7 @@ bool AudioPipe::deinitialize() {
 
 // instance members
 AudioPipe::AudioPipe(const char* uuid, const char* host, unsigned int port, const char* path,
-  int sslFlags, size_t bufLen, size_t minFreespace, const char* username, const char* password, notifyHandler_t callback) :
+  int sslFlags, size_t bufLen, size_t minFreespace, const char* username, const char* password, const char* token, notifyHandler_t callback) :
   m_uuid(uuid), m_host(host), m_port(port), m_path(path), m_sslFlags(sslFlags),
   m_audio_buffer_min_freespace(minFreespace), m_audio_buffer_max_len(bufLen), m_gracefulShutdown(false),
   m_audio_buffer_write_offset(LWS_PRE), m_recv_buf(nullptr), m_recv_buf_ptr(nullptr), 
@@ -442,6 +446,8 @@ AudioPipe::AudioPipe(const char* uuid, const char* host, unsigned int port, cons
     m_username.assign(username);
     m_password.assign(password);
   }
+  // Assign token if it exists
+  if (token) m_token.assign(token);
 
   m_audio_buffer = new uint8_t[m_audio_buffer_max_len];
 }
