@@ -51,6 +51,9 @@ namespace {
           }
           char fileType[6];
           int sampleRate = 16000;
+          std::string rawAudio;
+          std::ofstream f;
+          char szFilePath[256];
           if (0 == strcmp(format, "raw")) {
             cJSON* jsonSR = cJSON_GetObjectItem(jsonData, "sampleRate");
             sampleRate = jsonSR && jsonSR->valueint ? jsonSR->valueint : 0;
@@ -88,13 +91,12 @@ namespace {
           }
 
           if (validAudio) {
-            char szFilePath[256];
             switch_channel_t *channel = switch_core_session_get_channel(session);
 
-            std::string rawAudio = drachtio::base64_decode(jsonAudio->valuestring);
+            rawAudio = drachtio::base64_decode(jsonAudio->valuestring);
             switch_snprintf(szFilePath, 256, "%s%s%s_%d.tmp%s", SWITCH_GLOBAL_dirs.temp_dir, 
             SWITCH_PATH_SEPARATOR, tech_pvt->sessionId, playCount++, fileType);
-            std::ofstream f(szFilePath, std::ofstream::binary | std::ofstream::app);
+            f.open(szFilePath, std::ofstream::binary | std::ofstream::app);
             f << rawAudio;
             //f.close();
 
@@ -111,10 +113,12 @@ namespace {
 
           char* jsonString = cJSON_PrintUnformatted(jsonData);
           tech_pvt->responseHandler(session, EVENT_PLAY_AUDIO, jsonString);
-          for (int i = 0; i < 4; i++) {
-            f<<rawAudio;
+          if (validAudio && f.is_open()) {
+            for (int i = 0; i < 4; i++) {
+              f<<rawAudio;
+            }
+            f.close();
           }
-          f.close();
           free(jsonString);
           if (jsonAudio) cJSON_Delete(jsonAudio);
         }
