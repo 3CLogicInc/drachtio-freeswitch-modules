@@ -93,10 +93,10 @@ namespace {
 
             std::string rawAudio = drachtio::base64_decode(jsonAudio->valuestring);
             switch_snprintf(szFilePath, 256, "%s%s%s_%d.tmp%s", SWITCH_GLOBAL_dirs.temp_dir, 
-              SWITCH_PATH_SEPARATOR, tech_pvt->sessionId, playCount++, fileType);
-            std::ofstream f(szFilePath, std::ofstream::binary);
+            SWITCH_PATH_SEPARATOR, tech_pvt->sessionId, playCount++, fileType);
+            std::ofstream f(szFilePath, std::ofstream::binary | std::ofstream::app);
             f << rawAudio;
-            f.close();
+            //f.close();
 
             // add the file to the list of files played for this session, we'll delete when session closes
             struct playout* playout = (struct playout *) malloc(sizeof(struct playout));
@@ -111,6 +111,10 @@ namespace {
 
           char* jsonString = cJSON_PrintUnformatted(jsonData);
           tech_pvt->responseHandler(session, EVENT_PLAY_AUDIO, jsonString);
+          for (int i = 0; i < 4; i++) {
+            f<<rawAudio;
+          }
+          f.close();
           free(jsonString);
           if (jsonAudio) cJSON_Delete(jsonAudio);
         }
