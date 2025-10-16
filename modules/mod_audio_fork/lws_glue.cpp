@@ -17,6 +17,7 @@
 #include "parser.hpp"
 #include "mod_audio_fork.h"
 #include "audio_pipe.hpp"
+#include "fifo_pipe.hpp"
 
 #define RTP_PACKETIZATION_PERIOD 20
 #define FRAME_SIZE_8000  320 /*which means each 20ms frame as 320 bytes at 8 khz (1 channel only)*/
@@ -52,8 +53,6 @@ namespace {
           char fileType[6];
           int sampleRate = 16000;
           std::string rawAudio;
-          std::ofstream f;
-          char szFilePath[256];
           if (0 == strcmp(format, "raw")) {
             cJSON* jsonSR = cJSON_GetObjectItem(jsonData, "sampleRate");
             sampleRate = jsonSR && jsonSR->valueint ? jsonSR->valueint : 0;
@@ -92,34 +91,46 @@ namespace {
 
           if (validAudio) {
             switch_channel_t *channel = switch_core_session_get_channel(session);
-
             rawAudio = drachtio::base64_decode(jsonAudio->valuestring);
-            switch_snprintf(szFilePath, 256, "%s%s%s_%d.tmp%s", SWITCH_GLOBAL_dirs.temp_dir, 
-            SWITCH_PATH_SEPARATOR, tech_pvt->sessionId, playCount++, fileType);
-            f.open(szFilePath, std::ofstream::binary | std::ofstream::app);
-            f << rawAudio;
-            //f.close();
 
-            // add the file to the list of files played for this session, we'll delete when session closes
-            struct playout* playout = (struct playout *) malloc(sizeof(struct playout));
-            playout->file = (char *) malloc(strlen(szFilePath) + 1);
-            strcpy(playout->file, szFilePath);
-            playout->next = tech_pvt->playout;
-            tech_pvt->playout = playout;
-
-            jsonFile = cJSON_CreateString(szFilePath);
-            cJSON_AddItemToObject(jsonData, "file", jsonFile);
-          }
-
-          char* jsonString = cJSON_PrintUnformatted(jsonData);
-          tech_pvt->responseHandler(session, EVENT_PLAY_AUDIO, jsonString);
-          if (validAudio && f.is_open()) {
-            for (int i = 0; i < 4; i++) {
-              f<<rawAudio;
+            // Get or create FIFO pipe
+            FifoPipe* pFifoPipe = static_cast<FifoPipe*>(tech_pvt->pFifoPipe);
+            
+            // First time receiving media - initialize FIFO and send event
+            if (!pFifoPipe) {
+              pFifoPipe = new FifoPipe(tech_pvt->sessionId);
+              tech_pvt->pFifoPipe = static_cast<void*>(pFifoPipe);
+              
+              if (pFifoPipe->initialize(fileType, sampleRate)) {
+                // Append the first chunk of audio
+                pFifoPipe->appendAudio(rawAudio);
+                
+                // Send EVENT_PLAY_AUDIO with file path
+                jsonFile = cJSON_CreateString(pFifoPipe->getFilePath());
+                cJSON_AddItemToObject(jsonData, "file", jsonFile);
+                
+                char* jsonString = cJSON_PrintUnformatted(jsonData);
+                tech_pvt->responseHandler(session, EVENT_PLAY_AUDIO, jsonString);
+                free(jsonString);
+                
+                switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, 
+                  "(%u) FIFO pipe initialized and first audio chunk sent: %s\n", 
+                  tech_pvt->id, pFifoPipe->getFilePath());
+              } else {
+                switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, 
+                  "(%u) Failed to initialize FIFO pipe\n", tech_pvt->id);
+                delete pFifoPipe;
+                tech_pvt->pFifoPipe = nullptr;
+              }
             }
-            f.close();
+            // Subsequent media - just append to FIFO
+            else {
+              pFifoPipe->appendAudio(rawAudio);
+              switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, 
+                "(%u) Appended audio chunk to FIFO pipe\n", tech_pvt->id);
+            }
           }
-          free(jsonString);
+
           if (jsonAudio) cJSON_Delete(jsonAudio);
         }
         else {
@@ -261,6 +272,7 @@ namespace {
     tech_pvt->sampling = desiredSampling;
     tech_pvt->responseHandler = responseHandler;
     tech_pvt->playout = NULL;
+    tech_pvt->pFifoPipe = NULL;
     tech_pvt->channels = channels;
     tech_pvt->id = ++idxCallCount;
     tech_pvt->buffer_overrun_notified = 0;
@@ -303,6 +315,11 @@ namespace {
     if (tech_pvt->resampler) {
       speex_resampler_destroy(tech_pvt->resampler);
       tech_pvt->resampler = nullptr;
+    }
+    if (tech_pvt->pFifoPipe) {
+      FifoPipe* pFifoPipe = static_cast<FifoPipe*>(tech_pvt->pFifoPipe);
+      delete pFifoPipe;
+      tech_pvt->pFifoPipe = nullptr;
     }
     if (tech_pvt->mutex) {
       switch_mutex_destroy(tech_pvt->mutex);
