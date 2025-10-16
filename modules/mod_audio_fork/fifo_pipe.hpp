@@ -11,6 +11,12 @@ public:
     FifoPipe(const char* sessionId);
     ~FifoPipe();
 
+    // Prevent copying and moving
+    FifoPipe(const FifoPipe&) = delete;
+    FifoPipe& operator=(const FifoPipe&) = delete;
+    FifoPipe(FifoPipe&&) = delete;
+    FifoPipe& operator=(FifoPipe&&) = delete;
+
     // Initialize the FIFO pipe with the given file type and sample rate
     bool initialize(const char* fileType, int sampleRate);
 

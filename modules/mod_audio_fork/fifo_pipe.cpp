@@ -21,7 +21,7 @@ FifoPipe::~FifoPipe() {
 
 void FifoPipe::generateFilePath() {
     char szFilePath[256];
-    switch_snprintf(szFilePath, 256, "%s%s%s_fifo%s", 
+    switch_snprintf(szFilePath, 256, "%s%s%s_fifo.tmp%s", 
         SWITCH_GLOBAL_dirs.temp_dir, 
         SWITCH_PATH_SEPARATOR, 
         sessionId_.c_str(), 
