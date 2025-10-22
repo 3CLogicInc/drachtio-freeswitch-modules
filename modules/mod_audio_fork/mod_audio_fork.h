@@ -44,6 +44,7 @@ struct private_data {
   SpeexResamplerState *resampler;
   responseHandler_t responseHandler;
   void *pAudioPipe;
+  void *pFifoPipe;
   int ws_state;
   char host[MAX_WS_URL_LEN];
   unsigned int port;
