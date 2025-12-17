@@ -12,6 +12,8 @@ extern "C" {
 		if (gcsServiceKeyFile) {
 		try {
 			auto creds = grpc::GoogleDefaultCredentials();
+      switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_CRIT, 
+        "Successfully initialized google api with provided credentials in %s\n", gcsServiceKeyFile);
 		} catch (const std::exception& e) {
 			switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_CRIT, 
 			"Error initializing google api with provided credentials in %s: %s\n", gcsServiceKeyFile, e.what());
