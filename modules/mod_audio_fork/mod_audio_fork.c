@@ -396,7 +396,6 @@ SWITCH_MODULE_LOAD_FUNCTION(mod_audio_fork_load)
     switch_event_reserve_subclass(EVENT_PARTIAL_SPEECH_RESULT) != SWITCH_STATUS_SUCCESS ||
     switch_event_reserve_subclass(EVENT_END_OF_UTTERANCE) != SWITCH_STATUS_SUCCESS ||
     switch_event_reserve_subclass(EVENT_START_OF_TRANSCRIPT) != SWITCH_STATUS_SUCCESS) {
-
 		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Couldn't register an event subclass for mod_audio_fork API.\n");
 		return SWITCH_STATUS_TERM;
 	}
@@ -438,8 +437,8 @@ SWITCH_MODULE_SHUTDOWN_FUNCTION(mod_audio_fork_shutdown)
 	switch_event_free_subclass(EVENT_END_OF_INTERACTION);
 	switch_event_free_subclass(EVENT_FIRST_TRANSCRIPT);
 	switch_event_free_subclass(EVENT_PARTIAL_SPEECH_RESULT);
-  switch_event_free_subclass(EVENT_END_OF_UTTERANCE);
-  switch_event_free_subclass(EVENT_START_OF_TRANSCRIPT);
+    switch_event_free_subclass(EVENT_END_OF_UTTERANCE);
+    switch_event_free_subclass(EVENT_START_OF_TRANSCRIPT);
 
 	return SWITCH_STATUS_SUCCESS;
 }
