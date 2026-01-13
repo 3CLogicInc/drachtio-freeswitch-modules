@@ -42,11 +42,11 @@ static void responseHandler(switch_core_session_t* session, const char * eventNa
   } else if (0 == strcmp(eventName, EVENT_END_OF_INTERACTION)){
       switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "received end of interaction event %s.\n", json);
   } else if (0 == strcmp(eventName, EVENT_PARTIAL_SPEECH_RESULT)){
-      switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "partial speech result event %s.\n", json);
+      switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "partial speech result event %s.\n", json);
   } else if (0 == strcmp(eventName, EVENT_END_OF_UTTERANCE)){
-      switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "end of utterance event %s.\n", json);
+      switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "end of utterance event %s.\n", json);
   } else if (0 == strcmp(eventName, EVENT_START_OF_TRANSCRIPT)){
-      switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "start of transcript event %s.\n", json);
+      switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "start of transcript event %s.\n", json);
   }
 
 	if (json) switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "responseHandler: sending event payload: %s.\n", json);
