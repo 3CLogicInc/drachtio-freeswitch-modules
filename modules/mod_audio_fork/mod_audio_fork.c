@@ -186,7 +186,7 @@ static switch_status_t send_text(switch_core_session_t *session, char* text) {
   return status;
 }
 
-#define FORK_API_SYNTAX "<uuid> [start | stop | send_text | pause | resume | graceful-shutdown ] [wss-url | path] [mono | mixed | stereo] [8000 | 16000 | 24000 | 32000 | 64000] [streamID] [ccId] [interactionId] [track] [metadata]"
+#define FORK_API_SYNTAX "<uuid> [start | stop | send_text | send_stop | pause | resume | graceful-shutdown ] [wss-url | path] [mono | mixed | stereo] [8000 | 16000 | 24000 | 32000 | 64000] [streamID] [ccId] [interactionId] [track] [metadata]"
 SWITCH_STANDARD_API(fork_function)
 {
 	char *mycmd = NULL, *argv[10] = { 0 };
@@ -229,6 +229,10 @@ SWITCH_STANDARD_API(fork_function)
           goto done;
         }
         status = send_text(lsession, argv[2]);
+      }
+      else if (!strcasecmp(argv[1], "send_stop")) {
+        switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "sending stop event\n");
+        status = fork_session_send_stop_event(lsession);
       }
       else if (!strcasecmp(argv[1], "start")) {
         switch_channel_t *channel = switch_core_session_get_channel(lsession);
