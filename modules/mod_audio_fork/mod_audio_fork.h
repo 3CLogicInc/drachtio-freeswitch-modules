@@ -13,21 +13,24 @@
 #define MAX_WS_URL_LEN (512)
 #define MAX_PATH_LEN (128)
 
-#define EVENT_TRANSCRIPTION      "mod_audio_fork::transcription"
-#define EVENT_TRANSFER           "mod_audio_fork::transfer"
-#define EVENT_PLAY_AUDIO         "mod_audio_fork::play_audio"
-#define EVENT_KILL_AUDIO         "mod_audio_fork::kill_audio"
-#define EVENT_DISCONNECT         "mod_audio_fork::disconnect"
-#define EVENT_ERROR              "mod_audio_fork::error"
-#define EVENT_CONNECT_SUCCESS    "mod_audio_fork::connect"
-#define EVENT_CONNECT_FAIL       "mod_audio_fork::connect_failed"
-#define EVENT_BUFFER_OVERRUN     "mod_audio_fork::buffer_overrun"
-#define EVENT_JSON               "mod_audio_fork::json"
-#define EVENT_MARK               "mod_audio_fork::mark"
-#define EVENT_PAUSE              "mod_audio_fork::pause"
-#define EVENT_RESUME             "mod_audio_fork::resume"
-#define EVENT_FIRST_TRANSCRIPT   "mod_audio_fork::first_transcript"
-#define EVENT_END_OF_INTERACTION "mod_audio_fork::end_of_interaction"
+#define EVENT_TRANSCRIPTION         "mod_audio_fork::transcription"
+#define EVENT_TRANSFER              "mod_audio_fork::transfer"
+#define EVENT_PLAY_AUDIO            "mod_audio_fork::play_audio"
+#define EVENT_KILL_AUDIO            "mod_audio_fork::kill_audio"
+#define EVENT_DISCONNECT            "mod_audio_fork::disconnect"
+#define EVENT_ERROR                 "mod_audio_fork::error"
+#define EVENT_CONNECT_SUCCESS       "mod_audio_fork::connect"
+#define EVENT_CONNECT_FAIL          "mod_audio_fork::connect_failed"
+#define EVENT_BUFFER_OVERRUN        "mod_audio_fork::buffer_overrun"
+#define EVENT_JSON                  "mod_audio_fork::json"
+#define EVENT_MARK                  "mod_audio_fork::mark"
+#define EVENT_PAUSE                 "mod_audio_fork::pause"
+#define EVENT_RESUME                "mod_audio_fork::resume"
+#define EVENT_FIRST_TRANSCRIPT      "mod_audio_fork::first_transcript"
+#define EVENT_END_OF_INTERACTION    "mod_audio_fork::end_of_interaction"
+#define EVENT_PARTIAL_SPEECH_RESULT "mod_audio_fork::partial_speech_result"
+#define EVENT_END_OF_UTTERANCE      "mod_audio_fork::end_of_utterance"
+#define EVENT_START_OF_TRANSCRIPT   "mod_audio_fork::start_of_transcript"
 
 #define MAX_METADATA_LEN (8192)
 
@@ -39,8 +42,8 @@ struct playout {
 typedef void (*responseHandler_t)(switch_core_session_t* session, const char* eventName, char* json);
 
 struct private_data {
-	switch_mutex_t *mutex;
-	char sessionId[MAX_SESSION_ID];
+  switch_mutex_t *mutex;
+  char sessionId[MAX_SESSION_ID];
   SpeexResamplerState *resampler;
   responseHandler_t responseHandler;
   void *pAudioPipe;

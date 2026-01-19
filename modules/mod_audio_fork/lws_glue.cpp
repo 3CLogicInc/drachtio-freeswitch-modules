@@ -170,6 +170,18 @@ namespace {
         char* jsonString = cJSON_PrintUnformatted(json);
           tech_pvt->responseHandler(session, EVENT_END_OF_INTERACTION, jsonString);
           free(jsonString);
+      } else if (0 == event.compare("partialSpeechResult")) {
+        char* jsonString = cJSON_PrintUnformatted(json);
+          tech_pvt->responseHandler(session, EVENT_PARTIAL_SPEECH_RESULT, jsonString);
+          free(jsonString);
+      } else if (0 == event.compare("endOfUtterance")) {
+        char* jsonString = cJSON_PrintUnformatted(json);
+          tech_pvt->responseHandler(session, EVENT_END_OF_UTTERANCE, jsonString);
+          free(jsonString);
+      } else if (0 == event.compare("startOfTranscript")) {
+        char* jsonString = cJSON_PrintUnformatted(json);
+          tech_pvt->responseHandler(session, EVENT_START_OF_TRANSCRIPT, jsonString);
+          free(jsonString);
       }
       else if (0 == event.compare("clear")){
           // clear event
@@ -505,6 +517,36 @@ extern "C" {
     if (!tech_pvt) return SWITCH_STATUS_FALSE;
     AudioPipe *pAudioPipe = static_cast<AudioPipe *>(tech_pvt->pAudioPipe);
     if (pAudioPipe && text) pAudioPipe->bufferForSending(text);
+
+    return SWITCH_STATUS_SUCCESS;
+  }
+
+  switch_status_t fork_session_send_stop_event(switch_core_session_t *session) {
+    switch_channel_t *channel = switch_core_session_get_channel(session);
+    switch_media_bug_t *bug = (switch_media_bug_t*) switch_channel_get_private(channel, MY_BUG_NAME);
+    if (!bug) {
+      switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "fork_session_send_stop_event failed because no bug\n");
+      return SWITCH_STATUS_FALSE;
+    }
+    private_t* tech_pvt = (private_t*) switch_core_media_bug_get_user_data(bug);
+  
+    if (!tech_pvt) return SWITCH_STATUS_FALSE;
+    AudioPipe *pAudioPipe = static_cast<AudioPipe *>(tech_pvt->pAudioPipe);
+    
+    if (pAudioPipe) {
+      cJSON *stopObj = cJSON_CreateObject();
+      cJSON_AddItemToObject(stopObj, "event", cJSON_CreateString("stop"));
+      if (pAudioPipe->streamSid.length() > 0) {
+        cJSON_AddItemToObject(stopObj, "streamSid", cJSON_CreateString(pAudioPipe->streamSid.c_str()));
+      }
+      char* stopJson = cJSON_PrintUnformatted(stopObj);
+      if (stopJson) {
+        switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "(%u) sending stop event: %s\n", tech_pvt->id, stopJson);
+        pAudioPipe->bufferForSending(stopJson);
+        free(stopJson);
+      }
+      cJSON_Delete(stopObj);
+    }
 
     return SWITCH_STATUS_SUCCESS;
   }

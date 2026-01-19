@@ -41,6 +41,12 @@ static void responseHandler(switch_core_session_t* session, const char * eventNa
       switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "recieved firstTrascript event  %s.\n", json);
   } else if (0 == strcmp(eventName, EVENT_END_OF_INTERACTION)){
       switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "received end of interaction event %s.\n", json);
+  } else if (0 == strcmp(eventName, EVENT_PARTIAL_SPEECH_RESULT)){
+      switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "partial speech result event %s.\n", json);
+  } else if (0 == strcmp(eventName, EVENT_END_OF_UTTERANCE)){
+      switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "end of utterance event %s.\n", json);
+  } else if (0 == strcmp(eventName, EVENT_START_OF_TRANSCRIPT)){
+      switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "start of transcript event %s.\n", json);
   }
 
 	if (json) switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "responseHandler: sending event payload: %s.\n", json);
@@ -180,7 +186,7 @@ static switch_status_t send_text(switch_core_session_t *session, char* text) {
   return status;
 }
 
-#define FORK_API_SYNTAX "<uuid> [start | stop | send_text | pause | resume | graceful-shutdown ] [wss-url | path] [mono | mixed | stereo] [8000 | 16000 | 24000 | 32000 | 64000] [streamID] [ccId] [interactionId] [track] [metadata]"
+#define FORK_API_SYNTAX "<uuid> [start | stop | send_text | send_stop | pause | resume | graceful-shutdown ] [wss-url | path] [mono | mixed | stereo] [8000 | 16000 | 24000 | 32000 | 64000] [streamID] [ccId] [interactionId] [track] [metadata]"
 SWITCH_STANDARD_API(fork_function)
 {
 	char *mycmd = NULL, *argv[10] = { 0 };
@@ -223,6 +229,10 @@ SWITCH_STANDARD_API(fork_function)
           goto done;
         }
         status = send_text(lsession, argv[2]);
+      }
+      else if (!strcasecmp(argv[1], "send_stop")) {
+        switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "sending stop event\n");
+        status = fork_session_send_stop_event(lsession);
       }
       else if (!strcasecmp(argv[1], "start")) {
         switch_channel_t *channel = switch_core_session_get_channel(lsession);
@@ -386,8 +396,10 @@ SWITCH_MODULE_LOAD_FUNCTION(mod_audio_fork_load)
     switch_event_reserve_subclass(EVENT_PAUSE) != SWITCH_STATUS_SUCCESS ||
     switch_event_reserve_subclass(EVENT_RESUME) != SWITCH_STATUS_SUCCESS ||
     switch_event_reserve_subclass(EVENT_END_OF_INTERACTION) != SWITCH_STATUS_SUCCESS ||
-    switch_event_reserve_subclass(EVENT_FIRST_TRANSCRIPT) != SWITCH_STATUS_SUCCESS){
-
+    switch_event_reserve_subclass(EVENT_FIRST_TRANSCRIPT) != SWITCH_STATUS_SUCCESS ||
+    switch_event_reserve_subclass(EVENT_PARTIAL_SPEECH_RESULT) != SWITCH_STATUS_SUCCESS ||
+    switch_event_reserve_subclass(EVENT_END_OF_UTTERANCE) != SWITCH_STATUS_SUCCESS ||
+    switch_event_reserve_subclass(EVENT_START_OF_TRANSCRIPT) != SWITCH_STATUS_SUCCESS) {
 		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Couldn't register an event subclass for mod_audio_fork API.\n");
 		return SWITCH_STATUS_TERM;
 	}
@@ -428,6 +440,9 @@ SWITCH_MODULE_SHUTDOWN_FUNCTION(mod_audio_fork_shutdown)
 	switch_event_free_subclass(EVENT_RESUME);
 	switch_event_free_subclass(EVENT_END_OF_INTERACTION);
 	switch_event_free_subclass(EVENT_FIRST_TRANSCRIPT);
+	switch_event_free_subclass(EVENT_PARTIAL_SPEECH_RESULT);
+    switch_event_free_subclass(EVENT_END_OF_UTTERANCE);
+    switch_event_free_subclass(EVENT_START_OF_TRANSCRIPT);
 
 	return SWITCH_STATUS_SUCCESS;
 }

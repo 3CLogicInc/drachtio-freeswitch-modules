@@ -51,6 +51,19 @@ uuid_audio_fork <uuid> send_text <metadata>
 Send a text frame of arbitrary data to the remote server (e.g. this can be used to notify of DTMF events).
 
 ```
+uuid_audio_fork <uuid> send_stop
+```
+
+Sends a "stop" event JSON message over the websocket connection (similar to the "start" event sent when connecting). This does NOT close the connection - use this to signal the remote server that the stream is ending, then call `stop` when ready to close the connection.
+
+```json
+{
+  "event": "stop",
+  "streamSid": "your-stream-id"
+}
+```
+
+```
 uuid_audio_fork <uuid> stop <metadata>
 ```
 
