@@ -347,6 +347,7 @@ SWITCH_STANDARD_API(fork_function)
             status = start_capture(lsession, flags, host, port, path, sampling, sslFlags, streamID , trackValue, out, "mod_audio_fork");
 
             cJSON_Delete(obj);
+            free(out);
         }
 			}
       else {
