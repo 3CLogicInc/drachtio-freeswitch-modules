@@ -280,11 +280,10 @@ SWITCH_STANDARD_API(fork_function)
             int channelCount = 1;
             char *out;
             char *trackValue = "inbound";
-            cJSON *obj, *start, *mediaFormat, *custom, *tracks;
+            cJSON *obj, *start, *mediaFormat, *tracks;
             obj = cJSON_CreateObject();
             start = cJSON_CreateObject();
             mediaFormat = cJSON_CreateObject();
-            custom = cJSON_CreateObject();
             tracks = cJSON_CreateArray();
             cJSON_AddItemToObject(obj, "event", cJSON_CreateString("start"));
             cJSON_AddItemToObject(obj, "sequenceNumber", cJSON_CreateNumber(1));
@@ -303,7 +302,7 @@ SWITCH_STANDARD_API(fork_function)
                 cJSON_AddItemToObject(start, "interactionId", cJSON_CreateString(interactionId));
             }
             if(metadata){
-                custom = cJSON_Parse(metadata);
+                cJSON *custom = cJSON_Parse(metadata);
                 cJSON_AddItemToObject(start, "customParameters", custom);
             }
             cJSON_AddItemToObject(start, "tracks", tracks);
