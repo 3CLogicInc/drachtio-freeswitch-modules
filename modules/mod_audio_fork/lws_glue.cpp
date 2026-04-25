@@ -446,6 +446,10 @@ extern "C" {
       return SWITCH_STATUS_FALSE;
     }
     if (SWITCH_STATUS_SUCCESS != fork_data_init(tech_pvt, session, host, port, path, sslFlags, samples_per_second, sampling, channels, metadata, responseHandler)) {
+      if (tech_pvt->pAudioPipe) {
+        delete static_cast<AudioPipe*>(tech_pvt->pAudioPipe);
+        tech_pvt->pAudioPipe = nullptr;
+      }
       destroy_tech_pvt(tech_pvt);
       return SWITCH_STATUS_FALSE;
     }
