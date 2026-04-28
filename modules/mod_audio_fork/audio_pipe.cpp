@@ -76,11 +76,12 @@ int AudioPipe::lws_callback(struct lws *wsi,
         if (ap) {
           ap->m_state = LWS_CLIENT_FAILED;
           ap->m_callback(ap->m_uuid.c_str(), AudioPipe::CONNECT_FAIL, (char *) in);
+          delete ap;
         }
         else {
-          lwsl_err("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_CONNECTION_ERROR unable to find wsi %p..\n", wsi); 
+          lwsl_err("AudioPipe::lws_service_thread LWS_CALLBACK_CLIENT_CONNECTION_ERROR unable to find wsi %p..\n", wsi);
         }
-      }      
+      }
       break;
 
     case LWS_CALLBACK_CLIENT_ESTABLISHED:
@@ -138,7 +139,11 @@ int AudioPipe::lws_callback(struct lws *wsi,
 
         if (lws_is_first_fragment(wsi)) {
           // allocate a buffer for the entire chunk of memory needed
-          assert(nullptr == ap->m_recv_buf);
+          if (ap->m_recv_buf) {
+            lwsl_warn("AudioPipe::lws_callback %s unexpected first fragment with stale receive buffer; freeing previous\n", ap->m_uuid.c_str());
+            delete [] ap->m_recv_buf;
+            ap->m_recv_buf = nullptr;
+          }
           size_t bufLen = len + lws_remaining_packet_payload(wsi);
           ap->m_recv_buf = new uint8_t[bufLen];
           ap->m_recv_buf_ptr = ap->m_recv_buf;
