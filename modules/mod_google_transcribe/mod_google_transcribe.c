@@ -21,29 +21,57 @@ static switch_status_t do_stop(switch_core_session_t *session);
 static void responseHandler(switch_core_session_t* session, const char * json) {
 	switch_event_t *event;
 	switch_channel_t *channel = switch_core_session_get_channel(session);
-
+	int isRTT = 0;
+    if (switch_true(switch_channel_get_variable(channel, "isRTT"))) {
+           isRTT = 1;
+	}
 	if (0 == strcmp("end_of_utterance", json)) {
+		if (isRTT) {
+           switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, TRANSCRIBE_EVENT_END_OF_UTTERANCE_2);
+		}
+		else {
 		switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, TRANSCRIBE_EVENT_END_OF_UTTERANCE);
+		}
 		switch_channel_event_set_data(channel, event);
 		switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "transcription-vendor", "google");
 	}
 	else if (0 == strcmp("end_of_transcript", json)) {
+		if (isRTT) {
+           switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, TRANSCRIBE_EVENT_END_OF_TRANSCRIPT_2);
+		}
+		else {
 		switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, TRANSCRIBE_EVENT_END_OF_TRANSCRIPT);
+		}
 		switch_channel_event_set_data(channel, event);
 		switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "transcription-vendor", "google");
 	}
 	else if (0 == strcmp("start_of_transcript", json)) {
+		if (isRTT) {
+           switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, TRANSCRIBE_EVENT_START_OF_TRANSCRIPT_2);
+		}
+		else {
 		switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, TRANSCRIBE_EVENT_START_OF_TRANSCRIPT);
+		}
 		switch_channel_event_set_data(channel, event);
 		switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "transcription-vendor", "google");
 	}
 	else if (0 == strcmp("max_duration_exceeded", json)) {
+		if (isRTT) {
+           switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, TRANSCRIBE_EVENT_MAX_DURATION_EXCEEDED_2);
+		}
+		else {
 		switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, TRANSCRIBE_EVENT_MAX_DURATION_EXCEEDED);
+		}
 		switch_channel_event_set_data(channel, event);
 		switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "transcription-vendor", "google");
 	}
 	else if (0 == strcmp("no_audio", json)) {
+		if (isRTT) {
+           switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, TRANSCRIBE_EVENT_NO_AUDIO_DETECTED_2);
+		}
+		else {
 		switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, TRANSCRIBE_EVENT_NO_AUDIO_DETECTED);
+		}
 		switch_channel_event_set_data(channel, event);
 		switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "transcription-vendor", "google");
 	}
@@ -57,14 +85,24 @@ static void responseHandler(switch_core_session_t* session, const char * json) {
 		}else{
 			switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "unable to create play inturrupt event \n");
 		}
+		if (isRTT) {
+           switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, TRANSCRIBE_EVENT_PLAY_INTERRUPT_2);
+		}
+		else {
 		switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, TRANSCRIBE_EVENT_PLAY_INTERRUPT);
+		}
 		switch_channel_event_set_data(channel, event);
 		switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "transcription-vendor", "google");
 	}
 	else {
 		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "json payload: %s.\n", json);
-
+		if (isRTT) {
+           switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, TRANSCRIBE_EVENT_RESULTS_2);
+		   switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "eventName from transcribe: %s.\n", TRANSCRIBE_EVENT_RESULTS_2);
+		}
+		else {
 		switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, TRANSCRIBE_EVENT_RESULTS);
+		}
 		switch_channel_event_set_data(channel, event);
 		switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "transcription-vendor", "google");
 		switch_event_add_body(event, "%s", json);
@@ -289,7 +327,7 @@ SWITCH_STANDARD_API(transcribe2_function)
 		goto done;
 	} else {
 		switch_core_session_t *lsession = NULL;
-
+        switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "start transcribing seperate channel : %s \n",argv[5]);
 		if ((lsession = switch_core_session_locate(argv[0]))) {
 			if (!strcasecmp(argv[1], "stop")) {
     		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_INFO, "stop transcribing\n");
@@ -414,7 +452,35 @@ SWITCH_MODULE_LOAD_FUNCTION(mod_transcribe_load)
         switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Couldn't register subclass %s!\n", TRANSCRIBE_EVENT_PLAY_INTERRUPT);
         return SWITCH_STATUS_TERM;
     }
-
+    
+	if (switch_event_reserve_subclass(TRANSCRIBE_EVENT_RESULTS_2) != SWITCH_STATUS_SUCCESS) {
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Couldn't register subclass %s!\n", TRANSCRIBE_EVENT_RESULTS_2);
+		return SWITCH_STATUS_TERM;
+	}
+	if (switch_event_reserve_subclass(TRANSCRIBE_EVENT_END_OF_UTTERANCE_2) != SWITCH_STATUS_SUCCESS) {
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Couldn't register subclass %s!\n", TRANSCRIBE_EVENT_END_OF_UTTERANCE_2);
+		return SWITCH_STATUS_TERM;
+	}
+    if (switch_event_reserve_subclass(TRANSCRIBE_EVENT_START_OF_TRANSCRIPT_2) != SWITCH_STATUS_SUCCESS) {
+        switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Couldn't register subclass %s!\n", TRANSCRIBE_EVENT_START_OF_TRANSCRIPT_2);
+        return SWITCH_STATUS_TERM;
+    }
+    if (switch_event_reserve_subclass(TRANSCRIBE_EVENT_END_OF_TRANSCRIPT_2) != SWITCH_STATUS_SUCCESS) {
+        switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Couldn't register subclass %s!\n", TRANSCRIBE_EVENT_END_OF_TRANSCRIPT_2);
+        return SWITCH_STATUS_TERM;
+    }
+    if (switch_event_reserve_subclass(TRANSCRIBE_EVENT_NO_AUDIO_DETECTED_2) != SWITCH_STATUS_SUCCESS) {
+        switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Couldn't register subclass %s!\n", TRANSCRIBE_EVENT_NO_AUDIO_DETECTED_2);
+        return SWITCH_STATUS_TERM;
+    }
+    if (switch_event_reserve_subclass(TRANSCRIBE_EVENT_MAX_DURATION_EXCEEDED_2) != SWITCH_STATUS_SUCCESS) {
+        switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Couldn't register subclass %s!\n", TRANSCRIBE_EVENT_MAX_DURATION_EXCEEDED_2);
+        return SWITCH_STATUS_TERM;
+    }
+    if (switch_event_reserve_subclass(TRANSCRIBE_EVENT_PLAY_INTERRUPT_2) != SWITCH_STATUS_SUCCESS) {
+        switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Couldn't register subclass %s!\n", TRANSCRIBE_EVENT_PLAY_INTERRUPT_2);
+        return SWITCH_STATUS_TERM;
+    }
 	/* connect my internal structure to the blank pointer passed to me */
 	*module_interface = switch_loadable_module_create_module_interface(pool, modname);
 
@@ -448,6 +514,14 @@ SWITCH_MODULE_SHUTDOWN_FUNCTION(mod_transcribe_shutdown)
 	switch_event_free_subclass(TRANSCRIBE_EVENT_NO_AUDIO_DETECTED);
 	switch_event_free_subclass(TRANSCRIBE_EVENT_MAX_DURATION_EXCEEDED);
 	switch_event_free_subclass(TRANSCRIBE_EVENT_PLAY_INTERRUPT);
+
+	switch_event_free_subclass(TRANSCRIBE_EVENT_RESULTS_2);
+	switch_event_free_subclass(TRANSCRIBE_EVENT_END_OF_UTTERANCE_2);
+	switch_event_free_subclass(TRANSCRIBE_EVENT_START_OF_TRANSCRIPT_2);
+	switch_event_free_subclass(TRANSCRIBE_EVENT_END_OF_TRANSCRIPT_2);
+	switch_event_free_subclass(TRANSCRIBE_EVENT_NO_AUDIO_DETECTED_2);
+	switch_event_free_subclass(TRANSCRIBE_EVENT_MAX_DURATION_EXCEEDED_2);
+	switch_event_free_subclass(TRANSCRIBE_EVENT_PLAY_INTERRUPT_2);
 
 	return SWITCH_STATUS_SUCCESS;
 }
